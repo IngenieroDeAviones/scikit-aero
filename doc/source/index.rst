@@ -11,7 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   api
+   atmosphere
+   gasdynamics
+   geometry
 
 Indices and tables
 ==================

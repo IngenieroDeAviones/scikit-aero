@@ -4,7 +4,6 @@
 scikit-aero
 ===========
 
-
 :Name: scikit-aero
 :Description: Aeronautical engineering calculations in Python
 :Website: https://github.com/AeroPython/scikit-aero
