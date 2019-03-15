@@ -126,10 +126,11 @@ def mach_from_nu(nu, in_radians=True, gamma=1.4):
     if not in_radians:
         nu = np.radians(nu)
 
-    nu_max = np.pi / 2. * (np.sqrt((gamma + 1.) / (gamma - 1.)) - 1)
-    if(nu <= 0.0 or nu >= nu_max):
-        raise ValueError("Prandtl-Meyer angle must be between (0, %f) radians."
-                         % nu_max)
+    nu_max = np.pi / 2.0 * (np.sqrt((gamma + 1.0) / (gamma - 1.0)) - 1)
+    if nu <= 0.0 or nu >= nu_max:
+        raise ValueError(
+            "Prandtl-Meyer angle must be between (0, %f) radians." % nu_max
+        )
 
     eq = implicit(PrandtlMeyerExpansion.nu)
     M = sp.optimize.newton(eq, 2.0, args=(nu,))
@@ -141,6 +142,7 @@ class IsentropicFlow(object):
     """Class representing an isentropic flow.
 
     """
+
     def __init__(self, gamma=1.4):
         """Constructor of IsentropicFlow.
 
@@ -225,11 +227,10 @@ class IsentropicFlow(object):
         M = np.asanyarray(M)
         # If there is any zero entry, NumPy array division gives infinity,
         # which is correct.
-        with np.errstate(divide='ignore'):
-            A_Astar = (
-                (2 / self.T_T0(M) / (self.gamma + 1)) **
-                ((self.gamma + 1) / (2 * (self.gamma - 1))) / M
-            )
+        with np.errstate(divide="ignore"):
+            A_Astar = (2 / self.T_T0(M) / (self.gamma + 1)) ** (
+                (self.gamma + 1) / (2 * (self.gamma - 1))
+            ) / M
         return A_Astar
 
 
@@ -237,6 +238,7 @@ class PrandtlMeyerExpansion(object):
     """Class representing a Prandtl-Meyer expansion fan.
 
     """
+
     @staticmethod
     def nu(M, gamma=1.4):
         """Prandtl-Meyer angle for a given Mach number.
@@ -264,9 +266,9 @@ class PrandtlMeyerExpansion(object):
         try:
             with np.errstate(invalid="raise"):
                 sgpgm = np.sqrt((gamma + 1) / (gamma - 1))
-                nu = (
-                    sgpgm * np.arctan(np.sqrt(M * M - 1) / sgpgm) -
-                    np.arctan(np.sqrt(M * M - 1)))
+                nu = sgpgm * np.arctan(np.sqrt(M * M - 1) / sgpgm) - np.arctan(
+                    np.sqrt(M * M - 1)
+                )
         except FloatingPointError:
             raise ValueError("Mach number must be supersonic")
         return nu
@@ -293,13 +295,15 @@ class PrandtlMeyerExpansion(object):
         """
         if not fl:
             fl = IsentropicFlow(gamma=gamma)
-        nu_max = (
-            PrandtlMeyerExpansion.nu(np.inf, fl.gamma) -
-            PrandtlMeyerExpansion.nu(M_1, fl.gamma))
+        nu_max = PrandtlMeyerExpansion.nu(np.inf, fl.gamma) - PrandtlMeyerExpansion.nu(
+            M_1, fl.gamma
+        )
         if theta > nu_max:
             raise ValueError(
-                "Deflection angle must be lower than maximum {:.2f}°"
-                .format(np.degrees(nu_max)))
+                "Deflection angle must be lower than maximum {:.2f}°".format(
+                    np.degrees(nu_max)
+                )
+            )
         self.M_1 = M_1
         self.theta = theta
         self.fl = fl

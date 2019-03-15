@@ -31,7 +31,8 @@ from skaero.gasdynamics.isentropic import mach_angle, IsentropicFlow
 
 
 # Exceptions used in this module
-class InvalidParametersError(Exception): pass
+class InvalidParametersError(Exception):
+    pass
 
 
 def max_deflection(M_1, gamma=1.4):
@@ -53,13 +54,13 @@ def max_deflection(M_1, gamma=1.4):
         Corresponding wave angle.
 
     """
+
     def eq(beta, M_1, gamma):
         os = _ShockClass(M_1, beta, gamma)
         return -os.theta
 
     mu = mach_angle(M_1)
-    beta_theta_max = optimize.fminbound(
-        eq, mu, np.pi / 2, args=(M_1, gamma), disp=0)
+    beta_theta_max = optimize.fminbound(eq, mu, np.pi / 2, args=(M_1, gamma), disp=0)
     os = _ShockClass(M_1, beta_theta_max, gamma)
     return os.theta, os.beta
 
@@ -99,37 +100,32 @@ def _ShockFactory(**kwargs):
       * p2_p1, theta(, weak=True)
 
     """
-    kwargs.setdefault('gamma', 1.4)
+    kwargs.setdefault("gamma", 1.4)
     try:
         # We want a view of the keys, but the syntax changed in Python 3
         params = kwargs.viewkeys()
     except AttributeError:
         params = kwargs.keys()
-    if 'theta' not in params:
-        kwargs.setdefault('beta', np.pi / 2)
+    if "theta" not in params:
+        kwargs.setdefault("beta", np.pi / 2)
         # ['X', 'beta', 'gamma']
         if len(params) != 3:
             raise InvalidParametersError("Invalid list of parameters")
     else:
-        if 'beta' in params:
+        if "beta" in params:
             raise InvalidParametersError("Invalid list of parameters")
-        kwargs.setdefault('weak', True)
+        kwargs.setdefault("weak", True)
         # ['X', 'theta', 'weak', 'gamma']
         if len(params) != 4:
             raise InvalidParametersError("Invalid list of parameters")
 
     # Here is the list of available resolution methods
-    methods_list = [
-        _from_deflection_angle
-    ]
+    methods_list = [_from_deflection_angle]
 
     # And we generate a dictionary from it, indexed by their call arguments
-    methods = {
-        frozenset(inspect.getargspec(f)[0]): f
-        for f in methods_list}
+    methods = {frozenset(inspect.getargspec(f)[0]): f for f in methods_list}
     # HACK, see http://stackoverflow.com/a/3999604/554319
-    _k_class = (
-        frozenset(inspect.getargspec(_ShockClass.__init__)[0]) - set(['self']))
+    _k_class = frozenset(inspect.getargspec(_ShockClass.__init__)[0]) - set(["self"])
     methods[_k_class] = _ShockClass
     try:
         call_sig = frozenset(params)
@@ -146,6 +142,7 @@ def _from_deflection_angle(M_1, theta, weak, gamma):
     """Returns oblique shock given upstream Mach number and deflection angle.
 
     """
+
     def eq(beta, M_1, theta, gamma):
         os = _ShockClass(M_1, beta, gamma)
         return os.theta - theta
@@ -156,11 +153,11 @@ def _from_deflection_angle(M_1, theta, weak, gamma):
     else:
         if weak:
             mu = mach_angle(M_1)
-            beta = optimize.bisect(
-                eq, mu, beta_theta_max, args=(M_1, theta, gamma))
+            beta = optimize.bisect(eq, mu, beta_theta_max, args=(M_1, theta, gamma))
         else:
             beta = optimize.bisect(
-                eq, beta_theta_max, np.pi / 2, args=(M_1, theta, gamma))
+                eq, beta_theta_max, np.pi / 2, args=(M_1, theta, gamma)
+            )
 
     return _ShockClass(M_1, beta, gamma)
 
@@ -169,12 +166,15 @@ class _ShockClass(object):
     """Class representing a shock.
 
     """
+
     def __init__(self, M_1, beta, gamma):
         mu = mach_angle(M_1)
         if beta < mu:
             raise ValueError(
-                "Shock wave angle must be higher than Mach angle {:.2f}°"
-                .format(np.degrees(mu)))
+                "Shock wave angle must be higher than Mach angle {:.2f}°".format(
+                    np.degrees(mu)
+                )
+            )
 
         self.M_1 = M_1
         self.M_1n = M_1 * np.sin(beta) if beta != 0.0 else 0.0
@@ -183,8 +183,9 @@ class _ShockClass(object):
 
     def __repr__(self):
         # FIXME: What if the object is returned from different parameters?
-        return ("Shock(M_1={0!r}, beta={1!r}, "
-                "gamma={2!r})".format(self.M_1, self.beta, self.gamma))
+        return "Shock(M_1={0!r}, beta={1!r}, " "gamma={2!r})".format(
+            self.M_1, self.beta, self.gamma
+        )
 
     @property
     def theta(self):
@@ -195,9 +196,11 @@ class _ShockClass(object):
             theta = 0.0
         else:
             theta = np.arctan(
-                2 / np.tan(self.beta) *
-                (np.sin(self.beta) ** 2 - 1 / self.M_1 / self.M_1) /
-                (self.gamma + np.cos(2 * self.beta) + 2 / self.M_1 / self.M_1))
+                2
+                / np.tan(self.beta)
+                * (np.sin(self.beta) ** 2 - 1 / self.M_1 / self.M_1)
+                / (self.gamma + np.cos(2 * self.beta) + 2 / self.M_1 / self.M_1)
+            )
         return theta
 
     @property
@@ -207,8 +210,9 @@ class _ShockClass(object):
         FIXME: Raises ZeroDivisionError if M_1n == 0.0. Consistent?
         """
         M_2n = np.sqrt(
-            (1 / (self.M_1n * self.M_1n) + (self.gamma - 1) / 2) /
-            (self.gamma - (self.gamma - 1) / 2 / (self.M_1n * self.M_1n)))
+            (1 / (self.M_1n * self.M_1n) + (self.gamma - 1) / 2)
+            / (self.gamma - (self.gamma - 1) / 2 / (self.M_1n * self.M_1n))
+        )
         return M_2n
 
     @property
@@ -224,9 +228,7 @@ class _ShockClass(object):
         """Pressure ratio across the shock.
 
         """
-        p2_p1 = (
-            1 + 2 * self.gamma *
-            (self.M_1n * self.M_1n - 1) / (self.gamma + 1))
+        p2_p1 = 1 + 2 * self.gamma * (self.M_1n * self.M_1n - 1) / (self.gamma + 1)
         return p2_p1
 
     @property
@@ -234,9 +236,7 @@ class _ShockClass(object):
         """Density ratio accross the shock.
 
         """
-        rho2_rho1 = (
-            (self.gamma + 1) /
-            (2 / (self.M_1n * self.M_1n) + self.gamma - 1))
+        rho2_rho1 = (self.gamma + 1) / (2 / (self.M_1n * self.M_1n) + self.gamma - 1)
         return rho2_rho1
 
     @property
@@ -276,8 +276,7 @@ class _ShockClass(object):
         if fl is None:
             fl = IsentropicFlow(gamma=self.gamma)
 
-        rho02_rho01 = (
-            fl.rho_rho0(self.M_1) / fl.rho_rho0(self.M_2) * self.rho2_rho1)
+        rho02_rho01 = fl.rho_rho0(self.M_1) / fl.rho_rho0(self.M_2) * self.rho2_rho1
 
         return rho02_rho01
 

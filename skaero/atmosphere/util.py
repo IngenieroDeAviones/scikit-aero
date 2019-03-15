@@ -12,6 +12,7 @@ import numpy as np
 # effective earth's radius
 R_Earth = 6356.7660e3  # m
 
+
 def geometric_to_geopotential(z):
     """Returns geopotential altitude from geometric altitude.
 
