@@ -18,6 +18,7 @@ Contents:
    :maxdepth: 2
    :caption: Skaero
 
+   aircraft_performance
    about_skaero
 
 .. toctree::
