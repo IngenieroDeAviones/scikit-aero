@@ -1,8 +1,3 @@
-.. image:: _static/logo.png
-        :align: center
-
-|
-
 What is **scikit-aero**?
 ========================
 
@@ -19,10 +14,11 @@ Contents:
    :caption: Skaero
 
    about_skaero
+   aircraft_design/index
 
 .. toctree::
    :maxdepth: 2
-   :caption: User guide
+   :caption: Examples
    
    examples/Convergent-divergent nozzle.ipynb
    examples/Oblique shocks chart.ipynb
